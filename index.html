@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #F2F2F2;
+    }
+
+    #container {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #captureCanvas {
+      width: 100%;
+      border: 1px solid black;
+      display: none; /* Hide canvas initially */
+    }
+
+    #captureVideo {
+      width: 100%;
+      border: 1px solid black;
+    }
+
+    textarea {
+      width: 100%;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <video id="captureVideo" autoplay playsinline muted></video>
+    <canvas id="captureCanvas"></canvas>
+    <textarea id="textInput" placeholder="Type something..."></textarea>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const captureVideo = document.getElementById('captureVideo');
+      const canvas = document.getElementById('captureCanvas');
+      const context = canvas.getContext('2d');
+      const textInput = document.getElementById('textInput');
+
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            captureVideo.srcObject = stream;
+            captureVideo.muted = true;
+            captureVideo.play(); // Ensure video plays
+            captureVideo.addEventListener('loadedmetadata', () => {
+                canvas.width = captureVideo.videoWidth;
+                canvas.height = captureVideo.videoHeight;
+            });
+        })
+        .catch(function(error) {
+            console.error("Error accessing the webcam: ", error);
+        });
+
+      function captureFrame() {
+          context.drawImage(captureVideo, 0, 0, canvas.width, canvas.height);
+      }
+
+      textInput.addEventListener('input', function() {
+          captureFrame();
+          captureVideo.style.display = 'none'; // Hide the video element
+          canvas.style.display = 'block'; // Show the canvas element
+      });
+
+      // For mobile devices, ensure interaction starts playback
+      textInput.addEventListener('touchstart', function() {
+          captureVideo.play();
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+
